@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>습관 트래커</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+<style>
+/* ── Reset & Variables ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:          #FEF6F2;
+  --bg2:         #FFF9F6;
+  --card:        #FFFFFF;
+  --pink:        #F2A8B8;
+  --pink-light:  #FDE8EE;
+  --pink-mid:    #F8C8D4;
+  --beige:       #F5E6DA;
+  --beige-mid:   #EDD5C0;
+  --sage:        #B8D4C0;
+  --sage-light:  #E4F0E8;
+  --sage-dark:   #7AAD7A;
+  --text-dark:   #4A3840;
+  --text-mid:    #8A6E78;
+  --text-light:  #C4A8B0;
+  --border:      #F0DDE4;
+  --shadow:      rgba(242,168,184,0.12);
+  --radius-lg:   20px;
+  --radius-md:   16px;
+  --radius-sm:   10px;
+}
+
+html, body {
+  height: 100%;
+  background: #E8D8DC;
+}
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--text-dark);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── App Shell ── */
+#app {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: var(--bg);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Scrollable content ── */
+.view-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 90px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Typography ── */
+.font-jua { font-family: 'Jua', sans-serif; }
+
+/* ── Header ── */
+.app-header {
+  background: var(--bg2);
+  padding: 48px 22px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.app-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-header-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 22px;
+  color: var(--text-dark);
+}
+
+.app-header-sub {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.header-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink-mid), var(--beige));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  border: 2px solid var(--border);
+  cursor: pointer;
+}
+
+/* ── Bottom Navigation ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  height: 68px;
+  background: #FFF;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 100;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 8px 0;
+  transition: opacity 0.15s;
+  opacity: 0.4;
+  border: none;
+  background: none;
+}
+
+.nav-item.active { opacity: 1; }
+.nav-item span { font-size: 10px; color: var(--text-dark); }
+.nav-item.active span { color: var(--pink); font-weight: 600; }
+.nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--pink); }
+
+/* ── Cards & Layout ── */
+.card {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.section-header {
+  padding: 16px 22px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title-row {
+  display: flex; align-items: center; gap: 8px;
+}
+
+.section-emoji-badge {
+  width: 28px; height: 28px;
+  border-radius: 9px;
+  background: var(--pink-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+
+.section-name {
+  font-family: 'Jua', sans-serif;
+  font-size: 15px;
+  color: var(--text-dark);
+}
+
+.section-count-badge {
+  font-size: 10px;
+  border-radius: 99px;
+  padding: 2px 9px;
+  font-weight: 500;
+}
+
+.badge-pink { background: var(--pink-light); color: var(--pink); }
+.badge-beige { background: var(--beige); color: var(--text-mid); }
+.badge-sage { background: var(--sage-light); color: var(--sage-dark); }
+
+.text-btn {
+  font-size: 11px;
+  color: var(--text-light);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 99px;
+  transition: background 0.15s;
+}
+
+.text-btn:hover { background: var(--pink-light); color: var(--pink); }
+
+/* ── Habit List ── */
+.habit-list {
+  padding: 0 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.habit-row {
+  background: var(--card);
+  border-radius: var(--radius-md);
+  padding: 13px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 6px var(--shadow);
+  transition: transform 0.15s, opacity 0.2s;
+}
+
+.habit-row.done { background: #F8FBF8; border-color: #D8EAD8; }
+.habit-row.done .habit-row-name { color: var(--sage-dark); }
+
+.habit-row-icon {
+  width: 42px; height: 42px;
+  border-radius: 13px;
+  background: var(--pink-light);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 20px;
+}
+
+.habit-row.done .habit-row-icon { background: var(--sage-light); }
+
+.habit-row-body { flex: 1; min-width: 0; }
+
+.habit-row-name-line {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+
+.habit-row-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.freq-tag {
+  font-size: 9px;
+  background: var(--beige);
+  color: var(--text-mid);
+  border-radius: 99px;
+  padding: 2px 7px;
+}
+
+.habit-row-meta {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 4px;
+}
+
+.habit-meta-item {
+  font-size: 10px;
+  color: var(--text-light);
+  display: flex; align-items: center; gap: 3px;
+}
+
+.streak-text { font-size: 10px; color: var(--pink); font-weight: 600; }
+.habit-row.done .streak-text { color: var(--sage-dark); }
+
+/* Checkbox */
+.habit-checkbox {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  color: transparent;
+  font-size: 13px;
+}
+
+.habit-checkbox.checked {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: #FFF;
+}
+
+/* ── Progress Card ── */
+.progress-card {
+  margin: 14px 22px;
+  background: linear-gradient(135deg, #FDE8EE, #FFF0E8);
+  border-radius: var(--radius-lg);
+  padding: 15px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid #F8D8E0;
+}
+
+.progress-info { flex: 1; }
+
+.progress-main {
+  font-family: 'Jua', sans-serif;
+  font-size: 17px;
+  color: var(--text-dark);
+}
+
+.progress-sub {
+  font-size: 11px;
+  color: var(--text-mid);
+  margin-top: 3px;
+}
+
+.progress-bar-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 8px;
+}
+
+.progress-bar-wrap {
+  flex: 1; height: 5px;
+  background: #F8D8E0;
+  border-radius: 99px; overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--pink), #F8C0D0);
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+.progress-pct {
+  font-size: 11px;
+  color: var(--pink);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── Date Strip ── */
+.date-strip {
+  padding: 14px 22px 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.date-main {
+  font-family: 'Jua', sans-serif;
+  font-size: 21px;
+  color: var(--text-dark);
+}
+
+.date-sub { font-size: 11px; color: var(--text-light); margin-top: 1px; }
+
+.fab {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--pink);
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(242,168,184,0.45);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.fab:hover { transform: scale(1.08); }
+
+/* ── Stats Card ── */
+.stats-summary-card {
+  margin: 16px 22px 0;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #F9F0F8, #FEF0E8);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; gap: 14px;
+}
+
+.stats-summary-info { flex: 1; }
+.stats-summary-label { font-size: 10px; color: var(--pink); font-weight: 500; margin-bottom: 3px; }
+.stats-summary-main { font-family: 'Jua', sans-serif; font-size: 19px; color: var(--text-dark); }
+.stats-summary-sub { font-size: 11px; color: var(--text-mid); margin-top: 4px; line-height: 1.4; }
+
+/* ── Primary Button ── */
+.btn-primary {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: calc(100% - 44px);
+  margin: 14px 22px 0;
+  padding: 15px;
+  border-radius: var(--radius-md);
+  background: var(--pink);
+  border: none;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #FFF;
+  box-shadow: 0 6px 20px rgba(242,168,184,0.4);
+  transition: transform 0.15s;
+}
+.btn-primary:hover { transform: translateY(-1px); }
+
+.btn-secondary {
+  display: block; width: 100%;
+  padding: 13px; border-radius: 14px;
+  background: var(--beige); border: 1.5px solid var(--border);
+  font-size: 14px; font-weight: 500; color: var(--text-mid);
+  cursor: pointer; transition: background 0.15s;
+}
+.btn-secondary:hover { background: var(--border); }
+
+/* ── Calendar ── */
+.calendar-wrap {
+  margin: 0 22px;
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 16px;
+}
+
+.cal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.cal-month {
+  font-family: 'Jua', sans-serif;
+  font-size: 17px;
+  color: var(--text-dark);
+}
+
+.cal-nav-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-mid);
+  font-size: 14px;
+  transition: background 0.15s;
+}
+
+.cal-nav-btn:hover { background: var(--pink-light); }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-day-name {
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-light);
+  padding: 2px 0 6px;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  font-size: 12px;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.cal-day:hover { background: var(--pink-light); }
+.cal-day.today { font-weight: 700; color: var(--pink); border: 2px solid var(--pink); }
+.cal-day.full { background: var(--sage); color: #FFF; }
+.cal-day.partial { background: var(--pink-light); color: var(--pink); }
+.cal-day.empty-day { cursor: default; }
+.cal-day.other-month { color: var(--text-light); opacity: 0.4; }
+
+/* ── Stats View ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 22px;
+}
+
+.stat-card {
+  background: var(--card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+.stat-card-label { font-size: 10px; color: var(--text-light); }
+.stat-card-value { font-family: 'Jua', sans-serif; font-size: 26px; color: var(--text-dark); }
+.stat-card-unit { font-size: 11px; color: var(--text-mid); }
+
+.stat-bar-row {
+  display: flex; align-items: center; gap: 3px;
+  margin-top: 2px;
+}
+
+.stat-bar-seg {
+  flex: 1; height: 5px;
+  border-radius: 99px;
+  background: var(--border);
+}
+
+.stat-bar-seg.filled { background: var(--pink); }
+
+/* Habit streak list in stats */
+.streak-list {
+  padding: 0 22px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.streak-row {
+  background: var(--card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+
+.streak-icon { font-size: 20px; }
+
+.streak-info { flex: 1; }
+.streak-name { font-size: 13px; font-weight: 500; color: var(--text-dark); }
+.streak-val { font-size: 11px; color: var(--text-mid); margin-top: 2px; }
+
+.streak-fire {
+  font-family: 'Jua', sans-serif;
+  font-size: 15px;
+  color: var(--pink);
+}
+
+/* ── Habit Management View ── */
+.habit-manage-list {
+  padding: 0 22px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.habit-manage-row {
+  background: var(--card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: 13px 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+
+.habit-manage-icon {
+  width: 40px; height: 40px;
+  border-radius: 13px;
+  background: var(--pink-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.habit-manage-body { flex: 1; min-width: 0; }
+.habit-manage-name { font-size: 14px; font-weight: 500; color: var(--text-dark); }
+.habit-manage-sub { font-size: 11px; color: var(--text-light); margin-top: 3px; }
+
+.habit-manage-actions {
+  display: flex; gap: 6px;
+}
+
+.icon-btn-sm {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+
+.icon-btn-sm:hover { background: var(--pink-light); }
+.icon-btn-sm.danger:hover { background: #FFE8E8; }
+
+/* ── Modal / Bottom Sheet ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(74, 56, 64, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.modal-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.bottom-sheet {
+  width: 100%; max-width: 430px;
+  background: var(--bg2);
+  border-radius: 24px 24px 0 0;
+  padding: 20px 22px 40px;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.modal-overlay.show .bottom-sheet {
+  transform: translateY(0);
+}
+
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--border);
+  border-radius: 99px;
+  margin: 0 auto 20px;
+}
+
+.sheet-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 18px;
+  color: var(--text-dark);
+  margin-bottom: 18px;
+}
+
+/* Form */
+.form-group { margin-bottom: 14px; }
+
+.form-label {
+  font-size: 12px;
+  color: var(--text-mid);
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus { border-color: var(--pink); }
+
+/* Emoji picker */
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+}
+
+.emoji-btn {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  background: var(--card);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+
+.emoji-btn:hover { background: var(--pink-light); border-color: var(--pink-mid); }
+.emoji-btn.selected { border-color: var(--pink); background: var(--pink-light); }
+
+/* Day selector */
+.day-selector {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+
+.day-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  font-size: 12px;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.day-btn.selected {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: #FFF;
+  font-weight: 600;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 82px;
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  max-width: 300px;
+  background: var(--text-dark);
+  color: #FFF;
+  padding: 10px 18px;
+  border-radius: 99px;
+  font-size: 13px;
+  z-index: 300;
+  opacity: 0;
+  transition: all 0.25s;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Empty state ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 22px;
+  gap: 10px;
+}
+
+.empty-state-emoji { font-size: 44px; }
+.empty-state-title { font-family: 'Jua', sans-serif; font-size: 17px; color: var(--text-mid); }
+.empty-state-sub { font-size: 12px; color: var(--text-light); text-align: center; line-height: 1.6; }
+
+/* ── Utility ── */
+.spacer-sm { height: 8px; }
+.spacer-md { height: 14px; }
+.spacer-lg { height: 20px; }
+.divider { height: 1px; background: var(--border); margin: 0 22px; }
+
+.btn-row {
+  display: flex; gap: 10px;
+  margin-top: 16px;
+}
+
+.btn-outline {
+  flex: 1; padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: transparent;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-outline:hover { background: var(--pink-light); }
+
+.btn-confirm {
+  flex: 2; padding: 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--pink);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #FFF;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(242,168,184,0.4);
+  transition: transform 0.15s;
+}
+
+.btn-confirm:hover { transform: translateY(-1px); }
+
+/* ── Remix icon sizing ── */
+.habit-row-icon i, .habit-manage-icon i { font-size: 20px; color: var(--text-mid); }
+.habit-row.done .habit-row-icon i { color: var(--sage-dark); }
+.icon-pick-item i { font-size: 22px; color: var(--text-mid); }
+.icon-pick-item.selected i { color: var(--pink); }
+.streak-icon i { font-size: 22px; color: var(--text-mid); }
+.ri-icon-lg { font-size: 28px; }
+
+/* ── Icon picker ── */
+.icon-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.icon-pick-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 4px; border-radius: 12px;
+  border: 2px solid transparent; cursor: pointer;
+  transition: all 0.15s; background: var(--card);
+}
+.icon-pick-item:hover { background: var(--pink-light); }
+.icon-pick-item.selected { border-color: var(--pink); background: var(--pink-light); }
+.icon-pick-label { font-size: 9px; color: var(--text-mid); text-align: center; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 0; }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;"></canvas>
+
+<div id="app">
+  <!-- Header (dynamic) -->
+  <div class="app-header" id="app-header">
+    <div class="app-header-row">
+      <div>
+        <div class="app-header-title font-jua" id="header-title">나의 습관</div>
+        <div class="app-header-sub" id="header-sub">작은 습관이 큰 변화를 만들어요</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View content -->
+  <div class="view-content" id="view-content"></div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-view="today" onclick="App.navigate('today')">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M3 9L11 3l8 6v10a1 1 0 01-1 1H4a1 1 0 01-1-1V9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        <rect x="8" y="12" width="6" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      <span>오늘</span>
+    </button>
+    <button class="nav-item" data-view="habits" onclick="App.navigate('habits')">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="3" y="3" width="16" height="16" rx="4" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M7 11l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>습관관리</span>
+    </button>
+    <button class="nav-item" data-view="calendar" onclick="App.navigate('calendar')">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="3" y="5" width="16" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M7 3v4M15 3v4M3 9h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <span>달력</span>
+    </button>
+    <button class="nav-item" data-view="stats" onclick="App.navigate('stats')">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <polyline points="3,17 7,11 11,14 15,7 19,10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>통계</span>
+    </button>
+  </nav>
+</div>
+
+<!-- Modal overlay -->
+<div class="modal-overlay" id="modal-overlay" onclick="Modal.handleOverlayClick(event)">
+  <div class="bottom-sheet" id="bottom-sheet"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════
+   LAYER 1: Storage — localStorage I/O
+═══════════════════════════════════════ */
+const Storage = {
+  KEYS: {
+    HABITS: 'ht_habits',
+    COMPLETIONS: 'ht_completions',
+  },
+
+  get(key) {
+    try {
+      return JSON.parse(localStorage.getItem(key)) ?? null;
+    } catch { return null; }
+  },
+
+  set(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  },
+
+  loadHabits() { return this.get(this.KEYS.HABITS) ?? []; },
+  saveHabits(habits) { this.set(this.KEYS.HABITS, habits); },
+
+  loadCompletions() { return this.get(this.KEYS.COMPLETIONS) ?? {}; },
+  saveCompletions(c) { this.set(this.KEYS.COMPLETIONS, c); },
+};
+
+/* ═══════════════════════════════════════
+   LAYER 2: Utils
+═══════════════════════════════════════ */
+const Utils = {
+  today() { return this.formatDate(new Date()); },
+
+  formatDate(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  },
+
+  parseDate(str) {
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  },
+
+  formatKoreanDate(d) {
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    return `${d.getMonth()+1}월 ${d.getDate()}일 ${days[d.getDay()]}요일`;
+  },
+
+  formatKoreanMonth(y, m) { return `${y}년 ${m+1}월`; },
+
+  getDayOfWeek(dateStr) {
+    return Utils.parseDate(dateStr).getDay(); // 0=Sun
+  },
+
+  // 0=Sun,1=Mon...6=Sat → our day keys
+  DAY_KEYS: ['sun','mon','tue','wed','thu','fri','sat'],
+  DAY_LABELS: ['일','월','화','수','목','금','토'],
+
+  uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
+
+  datesInRange(startStr, endStr) {
+    const dates = [];
+    const cur = Utils.parseDate(startStr);
+    const end = Utils.parseDate(endStr);
+    while (cur <= end) {
+      dates.push(Utils.formatDate(new Date(cur)));
+      cur.setDate(cur.getDate() + 1);
+    }
+    return dates;
+  },
+
+  prevDay(dateStr) {
+    const d = Utils.parseDate(dateStr);
+    d.setDate(d.getDate() - 1);
+    return Utils.formatDate(d);
+  },
+};
+
+/* ═══════════════════════════════════════
+   LAYER 3: HabitService — CRUD & logic
+   Habit schema:
+   { id, name, icon, days: ['mon','tue',...], note, createdAt }
+═══════════════════════════════════════ */
+const HabitService = {
+  _habits: [],
+
+  load() { this._habits = Storage.loadHabits(); },
+  save() { Storage.saveHabits(this._habits); },
+
+  getAll() { return [...this._habits]; },
+
+  add(data) {
+    const habit = {
+      id: Utils.uid(),
+      name: data.name.trim(),
+      icon: data.icon || 'star',
+      days: data.days ?? ['mon','tue','wed','thu','fri','sat','sun'],
+      note: data.note ?? '',
+      createdAt: Utils.today(),
+    };
+    this._habits.push(habit);
+    this.save();
+    return habit;
+  },
+
+  update(id, data) {
+    const idx = this._habits.findIndex(h => h.id === id);
+    if (idx === -1) return;
+    this._habits[idx] = { ...this._habits[idx], ...data };
+    this.save();
+  },
+
+  delete(id) {
+    this._habits = this._habits.filter(h => h.id !== id);
+    this.save();
+  },
+
+  // Habits scheduled for a given date
+  getForDate(dateStr) {
+    const dow = Utils.DAY_KEYS[Utils.getDayOfWeek(dateStr)];
+    return this._habits.filter(h => h.days.includes(dow));
+  },
+
+  getById(id) { return this._habits.find(h => h.id === id); },
+};
+
+/* ═══════════════════════════════════════
+   LAYER 4: TrackingService — completions
+   completions: { 'YYYY-MM-DD': { habitId: true } }
+═══════════════════════════════════════ */
+const TrackingService = {
+  _data: {},
+
+  load() { this._data = Storage.loadCompletions(); },
+  save() { Storage.saveCompletions(this._data); },
+
+  isComplete(dateStr, habitId) {
+    return !!(this._data[dateStr]?.[habitId]);
+  },
+
+  toggle(dateStr, habitId) {
+    if (!this._data[dateStr]) this._data[dateStr] = {};
+    const current = this._data[dateStr][habitId];
+    if (current) {
+      delete this._data[dateStr][habitId];
+    } else {
+      this._data[dateStr][habitId] = true;
+    }
+    this.save();
+    return !current;
+  },
+
+  getCompletedIds(dateStr) {
+    return Object.keys(this._data[dateStr] ?? {});
+  },
+
+  // rate: completed / scheduled (for habits on that day)
+  getDayRate(dateStr) {
+    const scheduled = HabitService.getForDate(dateStr);
+    if (!scheduled.length) return null;
+    const done = scheduled.filter(h => this.isComplete(dateStr, h.id)).length;
+    return { done, total: scheduled.length, rate: Math.round(done / scheduled.length * 100) };
+  },
+
+  // Current consecutive streak for a habit (going back from today)
+  getCurrentStreak(habitId) {
+    let streak = 0;
+    let date = Utils.today();
+    const habit = HabitService.getById(habitId);
+    if (!habit) return 0;
+
+    // Walk backwards
+    for (let i = 0; i < 365; i++) {
+      const dow = Utils.DAY_KEYS[Utils.getDayOfWeek(date)];
+      if (habit.days.includes(dow)) {
+        if (this.isComplete(date, habitId)) {
+          streak++;
+        } else {
+          // Allow today to be incomplete without breaking streak
+          if (i === 0) { date = Utils.prevDay(date); continue; }
+          break;
+        }
+      }
+      date = Utils.prevDay(date);
+    }
+    return streak;
+  },
+
+  // Completion % for last 30 days (for a habit)
+  getMonthRate(habitId) {
+    const habit = HabitService.getById(habitId);
+    if (!habit) return 0;
+    const today = Utils.today();
+    let scheduled = 0, done = 0;
+    let date = today;
+    for (let i = 0; i < 30; i++) {
+      const dow = Utils.DAY_KEYS[Utils.getDayOfWeek(date)];
+      if (habit.days.includes(dow)) {
+        scheduled++;
+        if (this.isComplete(date, habitId)) done++;
+      }
+      date = Utils.prevDay(date);
+    }
+    return scheduled ? Math.round(done / scheduled * 100) : 0;
+  },
+
+  // Return completion status for an entire month (for calendar)
+  getMonthData(year, month) {
+    const result = {};
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const rate = this.getDayRate(dateStr);
+      result[dateStr] = rate;
+    }
+    return result;
+  },
+
+  // Total completions today
+  getTodayStats() {
+    return this.getDayRate(Utils.today());
+  },
+
+  // Weekly completion rate (last 7 days)
+  getWeeklyRate() {
+    let total = 0, done = 0;
+    let date = Utils.today();
+    for (let i = 0; i < 7; i++) {
+      const r = this.getDayRate(date);
+      if (r) { total += r.total; done += r.done; }
+      date = Utils.prevDay(date);
+    }
+    return total ? Math.round(done / total * 100) : 0;
+  },
+};
+
+/* ═══════════════════════════════════════
+   LAYER 5: Modal
+═══════════════════════════════════════ */
+const Modal = {
+  _onClose: null,
+
+  open(contentHTML, onClose) {
+    document.getElementById('bottom-sheet').innerHTML = contentHTML;
+    document.getElementById('modal-overlay').classList.add('show');
+    this._onClose = onClose ?? null;
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => RoughIcons.initAll());
+  },
+
+  close() {
+    document.getElementById('modal-overlay').classList.remove('show');
+    document.body.style.overflow = '';
+    if (this._onClose) { this._onClose(); this._onClose = null; }
+  },
+
+  handleOverlayClick(e) {
+    if (e.target === document.getElementById('modal-overlay')) this.close();
+  },
+};
+
+/* ═══════════════════════════════════════
+   LAYER 6: Toast
+═══════════════════════════════════════ */
+const Toast = {
+  _timer: null,
+  show(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(this._timer);
+    this._timer = setTimeout(() => el.classList.remove('show'), 2200);
+  },
+};
+
+/* ═══════════════════════════════════════
+   LAYER 7: Views
+═══════════════════════════════════════ */
+
+// ── SVG helpers ──
+function svgCheck() {
+  return `<svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+    <path d="M2.5 6.5l3 3 5-5" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function svgClock() {
+  return `<svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+    <circle cx="5" cy="5" r="4" stroke="#C4A8B0" stroke-width="1.2"/>
+    <path d="M5 3v2.5l1.5 1" stroke="#C4A8B0" stroke-width="1.2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function renderProgressSVG(rate, size = 52, strokeWidth = 6) {
+  const r = (size / 2) - strokeWidth;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - rate / 100);
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="#F8D8E0" stroke-width="${strokeWidth}"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="#F2A8B8" stroke-width="${strokeWidth}"
+      stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
+      stroke-linecap="round" transform="rotate(-90 ${size/2} ${size/2})"/>
+    <text x="${size/2}" y="${size/2 + 5}" text-anchor="middle" font-family="Jua,sans-serif" font-size="${size < 60 ? 11 : 13}" fill="#4A3840">${rate}%</text>
+  </svg>`;
+}
+
+function renderFreqLabel(days) {
+  if (days.length === 7) return '매일';
+  const weekdays = ['mon','tue','wed','thu','fri'];
+  const weekend = ['sat','sun'];
+  if (weekdays.every(d => days.includes(d)) && days.length === 5) return '평일';
+  if (weekend.every(d => days.includes(d)) && days.length === 2) return '주말';
+  return days.map(d => Utils.DAY_LABELS[Utils.DAY_KEYS.indexOf(d)]).join('/') + '요일';
+}
+
+/* ─ TODAY VIEW ─ */
+const TodayView = {
+  render() {
+    const today = Utils.today();
+    const todayDate = Utils.parseDate(today);
+    const habits = HabitService.getForDate(today);
+    const stats = TrackingService.getTodayStats();
+    const rate = stats ? stats.rate : 0;
+
+
+    const greetings = ['오늘도 화이팅이에요!', '작은 습관이 쌓여요', '오늘 하루도 잘 해봐요!', '당신을 응원해요'];
+    const greeting = greetings[todayDate.getDate() % greetings.length];
+
+    const done = habits.filter(h => TrackingService.isComplete(today, h.id));
+    const remaining = habits.filter(h => !TrackingService.isComplete(today, h.id));
+
+    let html = `
+      <div class="date-strip">
+        <div>
+          <div class="date-main">${Utils.formatKoreanDate(todayDate)}</div>
+          <div class="date-sub">${greeting}</div>
+        </div>
+      </div>
+
+      <div class="progress-card">
+        ${renderProgressSVG(rate)}
+        <div class="progress-info">
+          <div class="progress-main font-jua">${stats ? `${stats.total}개 중 ${stats.done}개 완료` : '등록된 습관이 없어요'}</div>
+          <div class="progress-sub">${stats && stats.done === stats.total && stats.total > 0 ? '오늘 모든 습관 완료! 대단해요' : '오늘도 잘 하고 있어요!'}</div>
+          <div class="progress-bar-row">
+            <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${rate}%"></div></div>
+            <span class="progress-pct">${rate}%</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    if (!habits.length) {
+      html += `
+        <div class="empty-state">
+          <div class="empty-state-emoji"><i class="ri-seedling-line" style="font-size:44px;color:var(--sage);"></i></div>
+          <div class="empty-state-title">아직 습관이 없어요</div>
+          <div class="empty-state-sub">하단 '습관관리'에서<br>첫 번째 고정 습관을 추가해보세요!</div>
+        </div>
+      `;
+      return html;
+    }
+
+    if (remaining.length) {
+      html += `
+        <div class="section-header">
+          <div class="section-title-row">
+            <div class="section-emoji-badge"><i class="ri-time-line" style="font-size:14px;color:var(--text-mid);"></i></div>
+            <span class="section-name">남은 습관</span>
+            <span class="section-count-badge badge-beige">${remaining.length}개</span>
+          </div>
+        </div>
+        <div class="habit-list">
+          ${remaining.map(h => TodayView.renderHabitRow(h, today, false)).join('')}
+        </div>
+      `;
+    }
+
+    if (done.length) {
+      html += `
+        <div class="section-header" style="margin-top:8px;">
+          <div class="section-title-row">
+            <div class="section-emoji-badge" style="background:var(--sage-light);"><i class="ri-check-line" style="font-size:14px;color:var(--sage-dark);"></i></div>
+            <span class="section-name">완료한 습관</span>
+            <span class="section-count-badge badge-sage">${done.length}개</span>
+          </div>
+        </div>
+        <div class="habit-list">
+          ${done.map(h => TodayView.renderHabitRow(h, today, true)).join('')}
+        </div>
+      `;
+    }
+
+    html += '<div class="spacer-lg"></div>';
+    return html;
+  },
+
+  renderHabitRow(habit, dateStr, isDone) {
+    const streak = TrackingService.getCurrentStreak(habit.id);
+    const streakHTML = streak > 0
+      ? `<span class="streak-text"><i class="ri-fire-line"></i> ${streak}일 연속</span>`
+      : '';
+
+    return `
+      <div class="habit-row ${isDone ? 'done' : ''}" id="hrow-${habit.id}">
+        <div class="habit-row-icon"><i class="${Icons.get(habit.icon||'star')}"></i></div>
+        <div class="habit-row-body">
+          <div class="habit-row-name-line">
+            <span class="habit-row-name">${escHtml(habit.name)}</span>
+            <span class="freq-tag">${renderFreqLabel(habit.days)}</span>
+          </div>
+          <div class="habit-row-meta">
+            ${habit.note ? `<span class="habit-meta-item">${svgClock()} ${escHtml(habit.note)}</span>` : ''}
+            ${streakHTML}
+          </div>
+        </div>
+        <button class="habit-checkbox ${isDone ? 'checked' : ''}"
+          onclick="TodayView.toggleHabit('${habit.id}', '${dateStr}')"
+          aria-label="${isDone ? '완료 취소' : '완료 체크'}">
+          ${isDone ? svgCheck() : ''}
+        </button>
+      </div>
+    `;
+  },
+
+  toggleHabit(habitId, dateStr) {
+    const nowDone = TrackingService.toggle(dateStr, habitId);
+    const habit = HabitService.getById(habitId);
+    Toast.show(nowDone ? `${habit?.name ?? ''} 완료!` : '체크를 취소했어요');
+    App.renderCurrentView();
+    if (nowDone) {
+      const stats = TrackingService.getDayRate(dateStr);
+      if (stats && stats.done === stats.total) Confetti.burst();
+    }
+  },
+};
+
+/* ─ HABITS MANAGEMENT VIEW ─ */
+const HabitsView = {
+  render() {
+    const habits = HabitService.getAll();
+
+    let html = `
+      <div class="spacer-md"></div>
+      <div style="padding: 0 22px 12px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div class="font-jua" style="font-size:17px; color:var(--text-dark);">고정 습관 목록</div>
+          <div style="font-size:11px; color:var(--text-light); margin-top:2px;">매일 자동으로 오늘 할 일에 추가돼요</div>
+        </div>
+      </div>
+    `;
+
+    if (!habits.length) {
+      html += `
+        <div class="empty-state">
+          <div class="empty-state-emoji"><i class="ri-list-check-3" style="font-size:44px;color:var(--pink);"></i></div>
+          <div class="empty-state-title">등록된 습관이 없어요</div>
+          <div class="empty-state-sub">아래 버튼으로 첫 번째<br>고정 습관을 추가해보세요</div>
+        </div>
+      `;
+    } else {
+      html += `<div class="habit-manage-list">`;
+      habits.forEach(h => {
+        const streak = TrackingService.getCurrentStreak(h.id);
+        const rate = TrackingService.getMonthRate(h.id);
+        html += `
+          <div class="habit-manage-row">
+            <div class="habit-manage-icon"><i class="${Icons.get(h.icon||'star')}"></i></div>
+            <div class="habit-manage-body">
+              <div class="habit-manage-name">${escHtml(h.name)}</div>
+              <div class="habit-manage-sub">${renderFreqLabel(h.days)}${h.note ? ' · ' + escHtml(h.note) : ''} · 30일 달성률 ${rate}%</div>
+            </div>
+            <div class="habit-manage-actions">
+              <button class="icon-btn-sm" onclick="HabitsView.openEdit('${h.id}')" title="수정">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M9 2l2 2-7 7H2V9l7-7z" stroke="#8A6E78" stroke-width="1.3" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="icon-btn-sm danger" onclick="HabitsView.confirmDelete('${h.id}')" title="삭제">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M2 4h9M5 4V2.5h3V4M4 4l.7 6.5h3.6L9 4" stroke="#F28080" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+
+    html += `
+      <button class="btn-primary" onclick="HabitsView.openAdd()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" stroke="#FFF" stroke-width="1.5" opacity="0.6"/>
+          <path d="M8 5v6M5 8h6" stroke="#FFF" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        새 고정 습관 추가
+      </button>
+      <div class="spacer-lg"></div>
+    `;
+
+    return html;
+  },
+
+  openAdd() {
+    HabitsView._openForm(null);
+  },
+
+  openEdit(id) {
+    HabitsView._openForm(id);
+  },
+
+  _openForm(editId) {
+    const habit = editId ? HabitService.getById(editId) : null;
+    const selectedIcon = habit?.icon ?? 'star';
+    const selectedDays = habit?.days ?? ['mon','tue','wed','thu','fri','sat','sun'];
+
+    const iconGrid = Icons.ICON_LIST.map(({ key, label }) =>
+      `<div class="icon-pick-item ${key === selectedIcon ? 'selected' : ''}" data-icon="${key}" onclick="HabitsView._selectIcon(this)">
+        <i class="${Icons.get(key)}"></i>
+        <span class="icon-pick-label">${label}</span>
+      </div>`
+    ).join('');
+
+    const dayBtns = Utils.DAY_KEYS.map((key, i) =>
+      `<button class="day-btn ${selectedDays.includes(key) ? 'selected' : ''}"
+        onclick="HabitsView._toggleDay(this, '${key}')">${Utils.DAY_LABELS[i]}</button>`
+    ).join('');
+
+    Modal.open(`
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">${editId ? '습관 수정' : '새 고정 습관 추가'}</div>
+
+      <div class="form-group">
+        <label class="form-label">아이콘</label>
+        <div class="icon-pick-grid" id="icon-pick-grid">${iconGrid}</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">습관 이름 *</label>
+        <input class="form-input" id="habit-name-input" type="text" placeholder="예: 독서 30분"
+          value="${escHtml(habit?.name ?? '')}" maxlength="30">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">반복 요일</label>
+        <div class="day-selector" id="day-selector">${dayBtns}</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">메모 (선택)</label>
+        <input class="form-input" id="habit-note-input" type="text" placeholder="예: 아침 7시, 자기 전 등"
+          value="${escHtml(habit?.note ?? '')}" maxlength="30">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-outline" onclick="Modal.close()">취소</button>
+        <button class="btn-confirm" onclick="HabitsView._submit('${editId ?? ''}')">
+          ${editId ? '저장' : '추가하기'}
+        </button>
+      </div>
+    `);
+  },
+
+  _selectIcon(el) {
+    document.querySelectorAll('#icon-pick-grid .icon-pick-item').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+  },
+
+  _toggleDay(btn, key) {
+    btn.classList.toggle('selected');
+  },
+
+  _submit(editId) {
+    const name = document.getElementById('habit-name-input').value.trim();
+    if (!name) { Toast.show('습관 이름을 입력해주세요'); return; }
+
+    const icon = document.querySelector('#icon-pick-grid .icon-pick-item.selected')?.dataset.icon ?? 'star';
+    const days = [...document.querySelectorAll('#day-selector .day-btn.selected')]
+      .map(b => b.dataset.key ?? Utils.DAY_KEYS[Utils.DAY_LABELS.indexOf(b.textContent)]);
+
+    // rebuild days from DOM
+    const dayKeys = [];
+    document.querySelectorAll('#day-selector .day-btn').forEach((btn, i) => {
+      if (btn.classList.contains('selected')) dayKeys.push(Utils.DAY_KEYS[i]);
+    });
+
+    if (!dayKeys.length) { Toast.show('요일을 하나 이상 선택해주세요'); return; }
+
+    const note = document.getElementById('habit-note-input').value.trim();
+
+    if (editId) {
+      HabitService.update(editId, { name, icon, days: dayKeys, note });
+      Toast.show('습관이 수정됐어요');
+    } else {
+      HabitService.add({ name, icon, days: dayKeys, note });
+      Toast.show('새 습관이 추가됐어요');
+    }
+
+    Modal.close();
+    App.renderCurrentView();
+  },
+
+  confirmDelete(id) {
+    const habit = HabitService.getById(id);
+    Modal.open(`
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">습관 삭제</div>
+      <p style="font-size:14px; color:var(--text-mid); line-height:1.6; margin-bottom:20px;">
+        <strong>${escHtml(habit?.name ?? '')}</strong> 습관을 삭제할까요?<br>
+        <span style="font-size:12px; color:var(--text-light);">완료 기록은 유지됩니다.</span>
+      </p>
+      <div class="btn-row">
+        <button class="btn-outline" onclick="Modal.close()">취소</button>
+        <button class="btn-confirm" style="background:#F28080; box-shadow:0 4px 12px rgba(242,128,128,0.3);"
+          onclick="HabitsView._delete('${id}')">삭제</button>
+      </div>
+    `);
+  },
+
+  _delete(id) {
+    HabitService.delete(id);
+    Modal.close();
+    Toast.show('습관이 삭제됐어요');
+    App.renderCurrentView();
+  },
+};
+
+/* ─ CALENDAR VIEW ─ */
+const CalendarView = {
+  _year: new Date().getFullYear(),
+  _month: new Date().getMonth(),
+
+  render() {
+    return CalendarView._renderCalendar();
+  },
+
+  _renderCalendar() {
+    const { _year: y, _month: m } = CalendarView;
+    const monthData = TrackingService.getMonthData(y, m);
+    const today = Utils.today();
+
+    const firstDay = new Date(y, m, 1).getDay();
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const prevDays = new Date(y, m, 0).getDate();
+
+    let cells = '';
+
+    // prev month padding
+    for (let i = firstDay - 1; i >= 0; i--) {
+      cells += `<div class="cal-day other-month">${prevDays - i}</div>`;
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const rate = monthData[dateStr];
+      const isToday = dateStr === today;
+      const isFuture = dateStr > today;
+
+      let cls = 'cal-day';
+      if (isToday) cls += ' today';
+      else if (!isFuture && rate) {
+        if (rate.rate === 100) cls += ' full';
+        else if (rate.rate > 0) cls += ' partial';
+      }
+
+      const clickable = !isFuture ? `onclick="CalendarView.showDayDetail('${dateStr}')" style="cursor:pointer;"` : '';
+      cells += `<div class="${cls}" ${clickable}>${d}</div>`;
+    }
+
+    // next month padding
+    const totalCells = firstDay + daysInMonth;
+    const nextPad = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (let i = 1; i <= nextPad; i++) {
+      cells += `<div class="cal-day other-month">${i}</div>`;
+    }
+
+    const weeklyRate = TrackingService.getWeeklyRate();
+
+    return `
+      <div class="spacer-md"></div>
+      <div style="padding:0 22px 12px;">
+        <div class="font-jua" style="font-size:17px; color:var(--text-dark);">달력</div>
+        <div style="font-size:11px; color:var(--text-light); margin-top:2px;">날짜별 완료 기록을 확인해요</div>
+      </div>
+
+      <div class="calendar-wrap">
+        <div class="cal-header">
+          <button class="cal-nav-btn" onclick="CalendarView._navigate(-1)">‹</button>
+          <span class="cal-month">${Utils.formatKoreanMonth(y, m)}</span>
+          <button class="cal-nav-btn" onclick="CalendarView._navigate(1)">›</button>
+        </div>
+        <div class="cal-grid">
+          ${Utils.DAY_LABELS.map(d => `<div class="cal-day-name">${d}</div>`).join('')}
+          ${cells}
+        </div>
+        <div style="margin-top:14px; display:flex; gap:12px; flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:5px;">
+            <div style="width:12px;height:12px;border-radius:50%;background:var(--sage);"></div>
+            <span style="font-size:10px;color:var(--text-light);">100% 완료</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <div style="width:12px;height:12px;border-radius:50%;background:var(--pink-light);border:1px solid var(--pink);"></div>
+            <span style="font-size:10px;color:var(--text-light);">일부 완료</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-summary-card">
+        <div class="stats-summary-info">
+          <div class="stats-summary-label">이번 주 달성률</div>
+          <div class="stats-summary-main">주간 실행률 ${weeklyRate}%</div>
+          <div class="stats-summary-sub">꾸준한 작은 습관이 오늘의 나를 만들어요</div>
+        </div>
+        ${renderProgressSVG(weeklyRate, 60, 7)}
+      </div>
+      <div class="spacer-lg"></div>
+    `;
+  },
+
+  _navigate(dir) {
+    CalendarView._month += dir;
+    if (CalendarView._month < 0) { CalendarView._month = 11; CalendarView._year--; }
+    if (CalendarView._month > 11) { CalendarView._month = 0; CalendarView._year++; }
+    App.renderCurrentView();
+  },
+
+  showDayDetail(dateStr) {
+    const d = Utils.parseDate(dateStr);
+    const label = `${d.getMonth()+1}월 ${d.getDate()}일 ${['일','월','화','수','목','금','토'][d.getDay()]}요일`;
+    const scheduled = HabitService.getForDate(dateStr);
+    const isToday = dateStr === Utils.today();
+
+    let rows = '';
+    if (!scheduled.length) {
+      rows = `<div style="text-align:center;color:var(--text-light);font-size:13px;padding:20px 0;">이날 예정된 습관이 없어요</div>`;
+    } else {
+      scheduled.forEach(h => {
+        const done = TrackingService.isComplete(dateStr, h.id);
+        rows += `
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--border);">
+            <div style="width:38px;height:38px;border-radius:12px;background:${done ? 'var(--sage-light)' : 'var(--beige)'};
+              display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+              <i class="${Icons.get(h.icon||'star')}" style="color:${done ? 'var(--sage)' : 'var(--text-light)'};"></i>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;color:${done ? 'var(--text-dark)' : 'var(--text-light)'};
+                ${done ? '' : 'opacity:0.5;'}">${escHtml(h.name)}</div>
+              ${h.note ? `<div style="font-size:11px;color:var(--text-light);margin-top:2px;">${escHtml(h.note)}</div>` : ''}
+            </div>
+            <div style="font-size:18px;">${done
+              ? `<i class="ri-checkbox-circle-fill" style="color:var(--sage);"></i>`
+              : `<i class="ri-checkbox-blank-circle-line" style="color:var(--border);"></i>`}
+            </div>
+          </div>`;
+      });
+    }
+
+    const done = scheduled.filter(h => TrackingService.isComplete(dateStr, h.id)).length;
+    const total = scheduled.length;
+
+    Modal.open(`
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">${label}</div>
+      ${total ? `<div style="font-size:12px;color:var(--text-light);margin:-8px 0 16px;">
+        ${done}/${total} 완료 · 달성률 ${total ? Math.round(done/total*100) : 0}%</div>` : ''}
+      <div>${rows}</div>
+      <div style="height:16px;"></div>
+      <button class="btn-secondary" onclick="Modal.close()">닫기</button>
+    `);
+  },
+};
+
+/* ─ STATS VIEW ─ */
+const StatsView = {
+  render() {
+    const habits = HabitService.getAll();
+    const weeklyRate = TrackingService.getWeeklyRate();
+    const todayStats = TrackingService.getTodayStats();
+
+    // Total completions last 30 days
+    let total30 = 0, done30 = 0;
+    let date = Utils.today();
+    for (let i = 0; i < 30; i++) {
+      const r = TrackingService.getDayRate(date);
+      if (r) { total30 += r.total; done30 += r.done; }
+      date = Utils.prevDay(date);
+    }
+    const rate30 = total30 ? Math.round(done30 / total30 * 100) : 0;
+
+    // Bar (7 days)
+    const week7 = [];
+    date = Utils.today();
+    for (let i = 6; i >= 0; i--) {
+      const d = Utils.parseDate(date);
+      const r = TrackingService.getDayRate(date);
+      week7.push({ label: Utils.DAY_LABELS[d.getDay()], rate: r ? r.rate : null, dateStr: date });
+      date = Utils.prevDay(date);
+    }
+
+    const barSegs = week7.map(w =>
+      `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="width:100%;height:40px;background:var(--border);border-radius:6px;position:relative;overflow:hidden;">
+          <div style="position:absolute;bottom:0;width:100%;height:${w.rate ?? 0}%;background:${w.rate === 100 ? 'var(--sage)' : 'var(--pink)'};border-radius:6px;transition:height 0.5s;"></div>
+        </div>
+        <span style="font-size:9px;color:var(--text-light);">${w.label}</span>
+      </div>`
+    ).join('');
+
+    let html = `
+      <div class="spacer-md"></div>
+      <div style="padding:0 22px 14px;">
+        <div class="font-jua" style="font-size:17px; color:var(--text-dark);">통계</div>
+        <div style="font-size:11px; color:var(--text-light); margin-top:2px;">나의 습관 달성 현황</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-label">이번 주 달성률</div>
+          <div class="stat-card-value">${weeklyRate}<span style="font-size:14px;">%</span></div>
+          <div class="stat-card-unit">지난 7일</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">30일 달성률</div>
+          <div class="stat-card-value">${rate30}<span style="font-size:14px;">%</span></div>
+          <div class="stat-card-unit">지난 30일</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">오늘 완료</div>
+          <div class="stat-card-value">${todayStats?.done ?? 0}<span style="font-size:14px;">개</span></div>
+          <div class="stat-card-unit">/ ${todayStats?.total ?? 0}개</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">등록된 습관</div>
+          <div class="stat-card-value">${habits.length}<span style="font-size:14px;">개</span></div>
+          <div class="stat-card-unit">고정 습관</div>
+        </div>
+      </div>
+
+      <div style="margin:14px 22px 0; background:var(--card); border-radius:var(--radius-lg); border:1px solid var(--border); padding:16px;">
+        <div class="font-jua" style="font-size:14px; color:var(--text-dark); margin-bottom:12px;">7일 달성 현황</div>
+        <div style="display:flex;gap:6px;height:60px;align-items:flex-end;">${barSegs}</div>
+      </div>
+    `;
+
+    if (habits.length) {
+      html += `
+        <div class="section-header" style="margin-top:8px;">
+          <div class="section-title-row">
+            <div class="section-emoji-badge"><i class="ri-fire-line" style="font-size:14px;color:var(--pink);"></i></div>
+            <span class="section-name">습관별 스트릭</span>
+          </div>
+        </div>
+        <div class="streak-list">
+      `;
+      habits.forEach(h => {
+        const streak = TrackingService.getCurrentStreak(h.id);
+        const rate = TrackingService.getMonthRate(h.id);
+        html += `
+          <div class="streak-row">
+            <span class="streak-icon"><i class="${Icons.get(h.icon||'star')}"></i></span>
+            <div class="streak-info">
+              <div class="streak-name">${escHtml(h.name)}</div>
+              <div class="streak-val">30일 달성률 ${rate}%</div>
+            </div>
+            <span class="streak-fire">${streak > 0 ? `<i class="ri-fire-line"></i> ${streak}일` : '-'}</span>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+
+    html += '<div class="spacer-lg"></div>';
+    return html;
+  },
+};
+
+/* ═══════════════════════════════════════
+   LAYER 8: Icons — Remix Icon 매핑
+   Apache 2.0 License · remixicon.com
+═══════════════════════════════════════ */
+const Icons = {
+  MAP: {
+    book:      'ri-book-2-line',
+    write:     'ri-pencil-line',
+    water:     'ri-drop-line',
+    run:       'ri-run-line',
+    walk:      'ri-walk-line',
+    gym:       'ri-boxing-line',
+    moon:      'ri-moon-line',
+    sun:       'ri-sun-line',
+    apple:     'ri-apple-line',
+    pill:      'ri-capsule-line',
+    heart:     'ri-heart-line',
+    music:     'ri-music-2-line',
+    leaf:      'ri-plant-line',
+    smile:     'ri-emotion-happy-line',
+    coffee:    'ri-cup-line',
+    star:      'ri-star-line',
+  },
+
+  ICON_LIST: [
+    { key: 'book',   label: '독서' },
+    { key: 'write',  label: '글쓰기' },
+    { key: 'water',  label: '수분' },
+    { key: 'run',    label: '달리기' },
+    { key: 'walk',   label: '걷기' },
+    { key: 'gym',    label: '운동' },
+    { key: 'moon',   label: '수면' },
+    { key: 'sun',    label: '아침' },
+    { key: 'apple',  label: '식습관' },
+    { key: 'pill',   label: '영양제' },
+    { key: 'heart',  label: '건강' },
+    { key: 'music',  label: '음악' },
+    { key: 'leaf',   label: '자연' },
+    { key: 'smile',  label: '긍정' },
+    { key: 'coffee', label: '카페인' },
+    { key: 'star',   label: '목표' },
+  ],
+
+  get(key) { return this.MAP[key] || 'ri-star-line'; },
+  html(key) { return `<i class="${this.get(key)}"></i>`; },
+};
+
+// 하위 호환: RoughIcons 참조 보호
+const RoughIcons = { initAll() {}, ICON_LIST: Icons.ICON_LIST };
+
+/* ═══════════════════════════════════════
+   LAYER 9: App — Router & lifecycle
+═══════════════════════════════════════ */
+const HEADER_CONFIG = {
+  today:    { title: '나의 습관', sub: '작은 습관이 큰 변화를 만들어요' },
+  habits:   { title: '습관 관리', sub: '고정 습관을 설정하고 편집해요' },
+  calendar: { title: '기록 달력', sub: '날짜별 완료 현황을 돌아봐요' },
+  stats:    { title: '통계', sub: '나의 달성 현황을 확인해요' },
+};
+
+const VIEW_RENDERERS = {
+  today:    TodayView,
+  habits:   HabitsView,
+  calendar: CalendarView,
+  stats:    StatsView,
+};
+
+const App = {
+  _currentView: 'today',
+
+  init() {
+    HabitService.load();
+    TrackingService.load();
+    this.navigate('today');
+  },
+
+  navigate(view) {
+    this._currentView = view;
+
+    // Update nav
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.view === view);
+    });
+
+    // Update header
+    const cfg = HEADER_CONFIG[view];
+    document.getElementById('header-title').textContent = cfg.title;
+    document.getElementById('header-sub').textContent = cfg.sub;
+
+    this.renderCurrentView();
+  },
+
+  renderCurrentView() {
+    const renderer = VIEW_RENDERERS[this._currentView];
+    if (renderer) {
+      document.getElementById('view-content').innerHTML = renderer.render();
+      requestAnimationFrame(() => RoughIcons.initAll());
+    }
+  },
+};
+
+/* ── XSS protection ── */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* ── Seed dummy data (only if no habits exist yet) ── */
+function seedDummyData(force = false) {
+  if (!force && HabitService.getAll().length > 0) return;
+
+  // Add habits directly to storage
+  const habits = [
+    { id: 'h1', name: '독서 30분', icon: 'book',  days: ['mon','tue','wed','thu','fri','sat','sun'], note: '자기 전에', createdAt: '2026-09-01' },
+    { id: 'h2', name: '물 2L 마시기', icon: 'water', days: ['mon','tue','wed','thu','fri','sat','sun'], note: '',           createdAt: '2026-09-01' },
+    { id: 'h3', name: '스트레칭',    icon: 'run',   days: ['mon','wed','fri','sat'],                  note: '아침 10분',   createdAt: '2026-09-01' },
+    { id: 'h4', name: '일기 쓰기',   icon: 'write', days: ['mon','tue','wed','thu','fri','sat','sun'], note: '',           createdAt: '2026-09-01' },
+    { id: 'h5', name: '11시 전 취침', icon: 'moon',  days: ['mon','tue','wed','thu','fri','sat','sun'], note: '',           createdAt: '2026-09-01' },
+  ];
+  Storage.set(Storage.KEYS.HABITS, habits);
+
+  // Generate completions for Sept 1 ~ Oct 2 (yesterday)
+  const completions = {};
+  const start = new Date(2026, 8, 1);   // 로컬 시간 기준 9월 1일
+  const end   = new Date(2026, 9, 2);   // 로컬 시간 기준 10월 2일
+
+  // Per-habit completion probability (simulate real-ish behavior)
+  const prob = { h1: 0.85, h2: 0.90, h3: 0.75, h4: 0.60, h5: 0.70 };
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const dateStr = Utils.formatDate(d);
+    const dow = Utils.DAY_KEYS[d.getDay()];
+    completions[dateStr] = {};
+    habits.forEach(h => {
+      if (!h.days.includes(dow)) return;
+      if (Math.random() < prob[h.id]) completions[dateStr][h.id] = true;
+    });
+    // Remove empty date entries
+    if (Object.keys(completions[dateStr]).length === 0) delete completions[dateStr];
+  }
+
+  Storage.set(Storage.KEYS.COMPLETIONS, completions);
+  HabitService.load();
+  TrackingService.load();
+}
+
+/* ── Confetti (Canvas 물리 폭죽) ── */
+const Confetti = {
+  _raf: null,
+  _colors: ['#F2A8B8','#E8C4B8','#B8D4C0','#D4A8C0','#F2C4A8','#A8C4D4','#F2D4A8','#C4B8D4'],
+  _shapes: ['♥','★','✦','♦','✿','◆'],
+
+  burst() {
+    const canvas = document.getElementById('confetti-canvas');
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    if (this._raf) cancelAnimationFrame(this._raf);
+    ctx.clearRect(0, 0, W, H);
+
+    const particles = [];
+    const GRAVITY = 0.18, FRICTION = 0.97;
+
+    const shots = [
+      { x: W * 0.25, y: H * 0.30, delay: 0   },
+      { x: W * 0.72, y: H * 0.24, delay: 440 },
+      { x: W * 0.48, y: H * 0.34, delay: 750 },
+    ];
+
+    shots.forEach(({ x, y, delay }) => {
+      setTimeout(() => {
+        particles.push({ type:'flash', x, y, r:2, maxR:26, life:1,
+          color: this._colors[Math.floor(Math.random() * this._colors.length)] });
+        for (let i = 0; i < 14; i++) {
+          const angle = (i / 14) * Math.PI * 2 + (Math.random() * 0.4 - 0.2);
+          const spd = 2.8 + Math.random() * 2.7;
+          particles.push({
+            type: 'shape',
+            shape: this._shapes[Math.floor(Math.random() * this._shapes.length)],
+            x, y,
+            vx: Math.cos(angle) * spd,
+            vy: Math.sin(angle) * spd,
+            size: 14 + Math.random() * 8,
+            life: 1,
+            decay: 0.008 + Math.random() * 0.006,
+            color: this._colors[Math.floor(Math.random() * this._colors.length)],
+            trail: [],
+          });
+        }
+      }, delay);
+    });
+
+    let start = null;
+    const loop = (ts) => {
+      if (!start) start = ts;
+      ctx.fillStyle = 'rgba(255,255,255,0.0)';
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(254,246,242,0.45)';
+      ctx.fillRect(0, 0, W, H);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        if (p.type === 'flash') {
+          p.r += (p.maxR - p.r) * 0.25;
+          p.life -= 0.07;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.strokeStyle = p.color + Math.round(p.life * 255).toString(16).padStart(2,'0');
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          if (p.life <= 0) particles.splice(i, 1);
+          continue;
+        }
+        p.trail.push({ x: p.x, y: p.y });
+        if (p.trail.length > 3) p.trail.shift();
+        p.vy += GRAVITY; p.vx *= FRICTION; p.vy *= FRICTION;
+        p.x += p.vx; p.y += p.vy;
+        p.life -= p.decay;
+
+        for (let t = 0; t < p.trail.length; t++) {
+          const ratio = t / p.trail.length;
+          ctx.beginPath();
+          ctx.arc(p.trail[t].x, p.trail[t].y, p.size * 0.18 * ratio, 0, Math.PI * 2);
+          ctx.fillStyle = p.color + Math.round(ratio * p.life * 0.4 * 255).toString(16).padStart(2,'0');
+          ctx.fill();
+        }
+        ctx.save();
+        ctx.globalAlpha = p.life;
+        ctx.font = `${p.size}px serif`;
+        ctx.fillStyle = p.color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(p.shape, p.x, p.y);
+        ctx.restore();
+        if (p.life <= 0 || p.y > H + 20) particles.splice(i, 1);
+      }
+
+      if (particles.length > 0 || ts - start < 1800) {
+        this._raf = requestAnimationFrame(loop);
+      } else {
+        ctx.clearRect(0, 0, W, H);
+      }
+    };
+    this._raf = requestAnimationFrame(loop);
+  },
+};
+
+/* ── Boot ── */
+App.init();
+seedDummyData(true);
+App.navigate('today');
+
+// 브라우저 콘솔에서 seedDummyData(true) 로 강제 재삽입 가능
+window._resetDummy = () => { seedDummyData(true); App.navigate('today'); console.log('더미 데이터 재삽입 완료'); };
+</script>
+</body>
+</html>
