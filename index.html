@@ -1925,12 +1925,18 @@ const Confetti = {
     });
 
     let start = null;
+    const LAST_SHOT_DELAY = 750;
     const loop = (ts) => {
       if (!start) start = ts;
-      ctx.fillStyle = 'rgba(255,255,255,0.0)';
+      const elapsed = ts - start;
+      const allShotsScheduled = elapsed >= LAST_SHOT_DELAY + 100;
+
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = 'rgba(254,246,242,0.45)';
-      ctx.fillRect(0, 0, W, H);
+      // 꼬리 잔상을 위한 반투명 덮기 (파티클 있을 때만)
+      if (particles.length > 0) {
+        ctx.fillStyle = 'rgba(254,246,242,0.45)';
+        ctx.fillRect(0, 0, W, H);
+      }
 
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
@@ -1969,7 +1975,7 @@ const Confetti = {
         if (p.life <= 0 || p.y > H + 20) particles.splice(i, 1);
       }
 
-      if (particles.length > 0 || ts - start < 1800) {
+      if (particles.length > 0 || !allShotsScheduled) {
         this._raf = requestAnimationFrame(loop);
       } else {
         ctx.clearRect(0, 0, W, H);
