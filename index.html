@@ -970,7 +970,7 @@ const HabitService = {
   // Habits scheduled for a given date
   getForDate(dateStr) {
     const dow = Utils.DAY_KEYS[Utils.getDayOfWeek(dateStr)];
-    return this._habits.filter(h => h.days.includes(dow));
+    return this._habits.filter(h => h.days.includes(dow) && (!h.createdAt || dateStr >= h.createdAt));
   },
 
   getById(id) { return this._habits.find(h => h.id === id); },
@@ -1046,6 +1046,7 @@ const TrackingService = {
     let scheduled = 0, done = 0;
     let date = today;
     for (let i = 0; i < 30; i++) {
+      if (habit.createdAt && date < habit.createdAt) break;
       const dow = Utils.DAY_KEYS[Utils.getDayOfWeek(date)];
       if (habit.days.includes(dow)) {
         scheduled++;
@@ -1510,8 +1511,11 @@ const CalendarView = {
       const isFuture = dateStr > today;
 
       let cls = 'cal-day';
-      if (isToday) cls += ' today';
-      else if (!isFuture && rate) {
+      if (isToday) {
+        cls += ' today';
+        if (rate?.rate === 100) cls += ' full';
+        else if (rate?.rate > 0) cls += ' partial';
+      } else if (!isFuture && rate) {
         if (rate.rate === 100) cls += ' full';
         else if (rate.rate > 0) cls += ' partial';
       }
@@ -1640,13 +1644,13 @@ const StatsView = {
     }
     const rate30 = total30 ? Math.round(done30 / total30 * 100) : 0;
 
-    // Bar (7 days)
+    // Bar (7 days) — 왼쪽=6일 전, 오른쪽=오늘
     const week7 = [];
     date = Utils.today();
     for (let i = 6; i >= 0; i--) {
       const d = Utils.parseDate(date);
       const r = TrackingService.getDayRate(date);
-      week7.push({ label: Utils.DAY_LABELS[d.getDay()], rate: r ? r.rate : null, dateStr: date });
+      week7.unshift({ label: Utils.DAY_LABELS[d.getDay()], rate: r ? r.rate : null, dateStr: date });
       date = Utils.prevDay(date);
     }
 
@@ -1986,18 +1990,7 @@ const Confetti = {
 };
 
 /* ── Boot ── */
-// 더미 데이터 정리: h1~h5 ID를 가진 습관이 있으면 전체 초기화
-(function clearDummyIfPresent() {
-  const habits = Storage.get(Storage.KEYS.HABITS) || [];
-  const hasDummy = habits.some(h => ['h1','h2','h3','h4','h5'].includes(h.id));
-  if (hasDummy) {
-    Storage.set(Storage.KEYS.HABITS, []);
-    Storage.set(Storage.KEYS.COMPLETIONS, {});
-  }
-})();
-
 App.init();
-App.navigate('today');
 </script>
 </body>
 </html>
