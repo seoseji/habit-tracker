@@ -1981,11 +1981,7 @@ const Confetti = {
 
 /* ── Boot ── */
 App.init();
-seedDummyData(false);
 App.navigate('today');
-
-// 브라우저 콘솔에서 seedDummyData(true) 로 강제 재삽입 가능
-window._resetDummy = () => { seedDummyData(false); App.navigate('today'); console.log('더미 데이터 재삽입 완료'); };
 </script>
 </body>
 </html>
