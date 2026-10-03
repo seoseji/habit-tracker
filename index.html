@@ -1980,6 +1980,16 @@ const Confetti = {
 };
 
 /* ── Boot ── */
+// 더미 데이터 정리: h1~h5 ID를 가진 습관이 있으면 전체 초기화
+(function clearDummyIfPresent() {
+  const habits = Storage.get(Storage.KEYS.HABITS) || [];
+  const hasDummy = habits.some(h => ['h1','h2','h3','h4','h5'].includes(h.id));
+  if (hasDummy) {
+    Storage.set(Storage.KEYS.HABITS, []);
+    Storage.set(Storage.KEYS.COMPLETIONS, {});
+  }
+})();
+
 App.init();
 App.navigate('today');
 </script>
