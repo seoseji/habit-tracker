@@ -1962,6 +1962,11 @@ const Confetti = {
         p.x += p.vx; p.y += p.vy;
         p.life -= p.decay;
 
+        if (p.life <= 0 || p.y > H + 20) {
+          particles.splice(i, 1);
+          continue;
+        }
+
         for (let t = 0; t < p.trail.length; t++) {
           const ratio = t / p.trail.length;
           ctx.beginPath();
@@ -1977,7 +1982,6 @@ const Confetti = {
         ctx.textBaseline = 'middle';
         ctx.fillText(p.shape, p.x, p.y);
         ctx.restore();
-        if (p.life <= 0 || p.y > H + 20) particles.splice(i, 1);
       }
 
       if (particles.length > 0 || !allShotsScheduled) {
