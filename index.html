@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>습관 트래커</title>
+<!-- v1.4.1 -->
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
 <style>
@@ -1429,10 +1430,6 @@ const HabitsView = {
     if (!name) { Toast.show('습관 이름을 입력해주세요'); return; }
 
     const icon = document.querySelector('#icon-pick-grid .icon-pick-item.selected')?.dataset.icon ?? 'star';
-    const days = [...document.querySelectorAll('#day-selector .day-btn.selected')]
-      .map(b => b.dataset.key ?? Utils.DAY_KEYS[Utils.DAY_LABELS.indexOf(b.textContent)]);
-
-    // rebuild days from DOM
     const dayKeys = [];
     document.querySelectorAll('#day-selector .day-btn').forEach((btn, i) => {
       if (btn.classList.contains('selected')) dayKeys.push(Utils.DAY_KEYS[i]);
@@ -1809,6 +1806,10 @@ const App = {
 
   navigate(view) {
     this._currentView = view;
+    if (view === 'today') {
+      HabitService.load();
+      TrackingService.load();
+    }
 
     // Update nav
     document.querySelectorAll('.nav-item').forEach(el => {
